@@ -25,5 +25,12 @@ The first line contains the header of:
 
 Goal 1: Generate BEL namespace file using `bel_resources.write_namespace <https://github.com/cthoyt/bel-resources/blob/master/src/bel_resources/write_namespace.py>`_.
 
+Arguments to this function:
+
+- ``values`` should be a dictionary from keys as entries from ``Complex ac``  and the values as ``'C'``, which 
+  represents complexes in BEL namespace files
+- ``namespace_name`` should be ``'Complex Portal'``
+- ``namespace_keyword`` should be ``'complexportal'``.
+
 Goal 2: Create an instance of `pybel.BELGraph <https://pybel.readthedocs.io/en/latest/datamodel.html#pybel.BELGraph>`_
-and populate it with links from complexes to their constituent entities using `pybel.BELGraph.add_part_of <https://pybel.readthedocs.io/en/latest/datamodel.html#pybel.BELGraph.add_part_of>`_.
+and populate it with links from complexes to their constituent entities (in ``Identifiers (and stoichiometry) of molecules in complex``) using `pybel.BELGraph.add_part_of <https://pybel.readthedocs.io/en/latest/datamodel.html#pybel.BELGraph.add_part_of>`_.
