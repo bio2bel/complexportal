@@ -3,8 +3,8 @@ import os
 import sys
 from hashlib import sha256
 from pathlib import Path
-from typing import Any, IO, Optional, Union
-from urllib.request import urlopen, URLError
+from typing import Optional, Union
+from urllib.request import URLError, urlopen
 from warnings import warn
 
 from bel_resources import parse_bel_resource, write_namespace
