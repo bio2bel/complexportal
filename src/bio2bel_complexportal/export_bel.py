@@ -1,41 +1,18 @@
-import os
+# -*- coding: utf-8 -*-
+
+"""Export Complex Portal as BEL."""
+
 import sys
 from hashlib import sha256
 from pathlib import Path
 from typing import Optional, Union
-from urllib.request import URLError, urlopen
-from warnings import warn
 
-import pandas as pd
 import pybel
 
+from bio2bel_complexportal.constants import NAMESPACE_URL, TSV_PATH
+from bio2bel_complexportal.parser import df_getter
+
 CHUNKSIZE = 2 ** 20  # 1 megabyte
-
-NAMESPACE_URL = 'ftp://ftp.ebi.ac.uk/pub/databases/intact/complex/current/complextab/homo_sapiens.tsv'
-
-TSV_PATH = Path('homo_sapiens.tsv')
-# BELNS_PATH = Path('homo_sapiens.belns')
-
-
-def retrieve_and_cache(uri: str, output_name: Union[str, Path]) -> None:
-    """Retrieve a remote URI and save it, saving a backup of a previous file with the same name if present.
-
-    If there is a file matching `output_name` already existing, it is moved to `output_name.bak`. A previous `output_name.bak` is overwritten.
-
-    :param uri: URI to be retrieved
-    :param output_name: the location to store the retrieved file; passed directly to `open()`
-    """
-    with urlopen(uri) as remote_f:
-        try:
-            os.replace(output_name, f'{output_name}.bak')
-        except FileNotFoundError:
-            pass
-
-        with open(output_name, 'wb') as output_f:
-            chunk = remote_f.read(CHUNKSIZE)
-            while chunk:
-                output_f.write(chunk)
-                chunk = remote_f.read(CHUNKSIZE)
 
 
 def hash_file(path: Union[str, Path]) -> str:
@@ -56,7 +33,7 @@ def hash_file(path: Union[str, Path]) -> str:
 
 
 def is_version_string_equal_to_digest(
-    path: Union[str, Path], digest: Optional[str]
+        path: Union[str, Path], digest: Optional[str]
 ) -> bool:
     """Check if the digest stored in the VersionString of the BEL file at `path` is the same as the passed-in digest string.
 
@@ -73,17 +50,12 @@ def is_version_string_equal_to_digest(
 
 def main() -> Optional[int]:
     assert (
-        len(sys.argv) == 1 or len(sys.argv) == 2
+            len(sys.argv) == 1 or len(sys.argv) == 2
     ), 'requires 0 or 1 arguments: [output filename]'
 
     output_file = sys.argv[1] if len(sys.argv) == 2 else None
     if output_file and output_file.strip() == '-':  # handle '-' for stdout output
         output_file = None
-
-    try:
-        retrieve_and_cache(NAMESPACE_URL, TSV_PATH)
-    except URLError:
-        warn(f'could not retrieve `{NAMESPACE_URL}`, will try with cached version')
 
     try:
         digest = hash_file(TSV_PATH)
@@ -100,9 +72,7 @@ def main() -> Optional[int]:
             return
 
     # TODO: populate the graph with links from the TSV
-    with open(TSV_PATH, 'r') as f:
-        f.seek(1)  # skip the leading '#' in the file
-        complex_data = pd.read_table(f)
+    complex_data = df_getter()
     # TODO: graph metadata
     graph = pybel.BELGraph()
 
