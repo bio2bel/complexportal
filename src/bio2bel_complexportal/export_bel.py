@@ -7,6 +7,7 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Optional, Union
 
+import pandas as pd
 import pybel
 
 from bio2bel_complexportal.constants import NAMESPACE_URL, TSV_PATH
@@ -48,6 +49,14 @@ def is_version_string_equal_to_digest(
     return False
 
 
+def build_graph() -> pybel.BELGraph:
+    return _build_graph_from_df(df_getter())
+
+
+def _build_graph_from_df(df: pd.DataFrame) -> pybel.BELGraph:
+    raise NotImplementedError
+
+
 def main() -> Optional[int]:
     assert (
             len(sys.argv) == 1 or len(sys.argv) == 2
@@ -72,10 +81,8 @@ def main() -> Optional[int]:
             return
 
     # TODO: populate the graph with links from the TSV
-    complex_data = df_getter()
     # TODO: graph metadata
-    graph = pybel.BELGraph()
-
+    graph = build_graph()
     # TODO: output the BEL graph (as BEL?)
     pybel.to_bel(graph, file=output_file)
 
